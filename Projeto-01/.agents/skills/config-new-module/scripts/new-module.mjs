@@ -123,7 +123,7 @@ function ensureRegisteredInAppModule(appModulePath, className, moduleName, impor
     }
   }
   fs.writeFileSync(appModulePath, src, 'utf8');
-  info(`${className}Module registrado em app.module.ts (fallback do script)`);
+  info(`${className}Module registrado em app.module.ts`);
 }
 
 // ---------------------------------------------------------------------------
@@ -237,17 +237,11 @@ function main() {
 
   // ---- 4. backend NestJS -------------------------------------------------
   step(`Criar módulo NestJS em apps/backend/src/modules/${name}`);
-  run(`npx --no-install nest g module modules/${name}`, backend);
-  run(`npx --no-install nest g controller modules/${name} --no-spec`, backend);
-  // conteúdo final fixo (determinístico), independente da versão do CLI
+  // Mesma estrutura do `nest g module` + `nest g controller --no-spec`, gerada a partir dos assets.
+  // (O CLI não é usado: seus schematics quebram quando a raiz do monorepo usa TypeScript 7,
+  //  e gerar pelos assets garante resultado idêntico em toda execução.)
   writeFromAsset('backend/module.module.ts', path.join(backendModuleDir, `${name}.module.ts`), vars);
   writeFromAsset('backend/module.controller.ts', path.join(backendModuleDir, `${name}.controller.ts`), vars);
-  for (const f of fs.readdirSync(backendModuleDir)) {
-    if (f !== `${name}.module.ts` && f !== `${name}.controller.ts`) {
-      fs.rmSync(path.join(backendModuleDir, f), { recursive: true, force: true });
-      info(`removido arquivo extra gerado pelo CLI: ${f}`);
-    }
-  }
   ensureRegisteredInAppModule(appModulePath, className, name, importExt);
   info(`endpoint: GET /${name}`);
 

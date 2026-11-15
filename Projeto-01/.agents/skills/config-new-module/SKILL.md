@@ -52,10 +52,10 @@ minutos. Rode em background se a ferramenta tiver limite de tempo e espere termi
 2. Adiciona `"@namespace/<nome>": "*"` em `dependencies` de `apps/frontend` e `apps/backend`.
 3. Garante `ts-node` `^10.9.2` em `devDependencies` da raiz e
    `workspaces` contendo `apps/*`, `modules/*`, `packages/*`.
-4. Backend NestJS: `nest g module modules/<nome>` e `nest g controller modules/<nome> --no-spec`
-   (o CLI registra o módulo no `AppModule`); em seguida grava o conteúdo fixo
-   do módulo e do controller (`GET /<nome>` retorna `{ module, message }`).
-   Sem testes no backend.
+4. Backend NestJS: cria `<nome>.module.ts` e `<nome>.controller.ts` (mesma estrutura de
+   `nest g module` + `nest g controller --no-spec`, a partir dos assets) e registra o módulo
+   nos `imports` do `AppModule`. `GET /<nome>` retorna `{ module, message }`. Sem testes no backend.
+   Os imports seguem o estilo do backend (com `.js` no NestJS ≥ 12/ESM).
 5. Frontend Next.js:
    - rota: `apps/frontend/src/app/(private|public)/<nome>/page.tsx`
    - página principal: `apps/frontend/src/modules/<nome>/<nome>.page.tsx`
