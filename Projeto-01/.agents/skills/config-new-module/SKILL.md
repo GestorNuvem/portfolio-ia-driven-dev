@@ -47,6 +47,8 @@ minutos. Rode em background se a ferramenta tiver limite de tempo e espere termi
 1. Cria `modules/` (se não existir) e `modules/<nome>/` com os assets:
    `package.json` (nome `@namespace/<nome>`), `tsconfig.json`, `jest.config.ts`,
    `src/index.ts`, `src/index.test.ts`.
+   Se `packages/shared` existir (skill `config-shared-module`), o módulo também
+   recebe `"@namespace/shared": "*"` — todo módulo de negócio depende do shared.
 2. Adiciona `"@namespace/<nome>": "*"` em `dependencies` de `apps/frontend` e `apps/backend`.
 3. Garante `ts-node` `^10.9.2` em `devDependencies` da raiz e
    `workspaces` contendo `apps/*`, `modules/*`, `packages/*`.
