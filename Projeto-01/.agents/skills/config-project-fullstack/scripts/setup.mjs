@@ -464,13 +464,20 @@ async function main() {
         writeJson(pkgFile, data);
       }
 
-      // b) imports/extends em arquivos de código e config (só referências entre aspas)
-      const patterns = [...mapping].map(([from, to]) => ({
-        re: new RegExp(`(?<=['"\`])${escapeRegExp(from)}(?=['"\`/])`, 'g'),
-        to,
-      }));
+      // b) imports/extends em arquivos de código e config (só referências entre aspas).
+      //    - apenas nomes que JÁ tinham escopo (ex.: "@repo/ui"): nomes genéricos como
+      //      "frontend"/"backend" aparecem em código comum e só são trocados nos package.json;
+      //    - apenas dentro dos workspaces (apps/*, packages/*): nada fora deles é tocado
+      //      (ex.: .agents/, docs/ e outras pastas do usuário).
+      const patterns = [...mapping]
+        .filter(([from]) => from.startsWith('@'))
+        .map(([from, to]) => ({
+          re: new RegExp(`(?<=['"\`])${escapeRegExp(from)}(?=['"\`/])`, 'g'),
+          to,
+        }));
       let changed = 0;
-      for (const file of walkTextFiles(root)) {
+      const workspaceFiles = workspaces.flatMap((w) => walkTextFiles(w.dir));
+      for (const file of patterns.length ? workspaceFiles : []) {
         if (path.basename(file) === 'package.json') continue;
         const before = fs.readFileSync(file, 'utf8');
         let after = before;
