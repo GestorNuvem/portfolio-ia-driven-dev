@@ -1,0 +1,26 @@
+// Padrão de nomenclatura (skill backend-sync-module-prisma):
+// tabelas e colunas em letras minúsculas, snake_case e tabelas no plural (@@map / @map).
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// módulo auth — modules/auth/src/user/model/user.entity.ts
+model User {
+  id        String    @id @db.Uuid
+  name      String    @db.VarChar(80)
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("users")
+}

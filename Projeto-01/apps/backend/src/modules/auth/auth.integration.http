@@ -1,0 +1,81 @@
+### Testes de integração do módulo de autenticação (extensão REST Client do VS Code)
+# Pré-requisitos: banco no ar (docker compose up -d), migrations aplicadas e backend rodando (npm run dev).
+# Clique em "Send Request" acima de cada requisição.
+
+@baseUrl = http://localhost:4000
+@contentType = application/json
+# e-mail único a cada execução, para o registro com sucesso poder ser repetido
+@email = ana.{{$timestamp}}@mail.com
+
+### Status do módulo
+GET {{baseUrl}}/auth
+
+### Registrar usuário — sucesso (201 sem corpo)
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Ana Maria Silva",
+  "email": "{{email}}",
+  "password": "Abcdef1!"
+}
+
+### Registrar usuário — e-mail já cadastrado (409)
+# Rode logo após a requisição anterior: usa o mesmo e-mail fixo duas vezes.
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Ana Maria Silva",
+  "email": "duplicado@mail.com",
+  "password": "Abcdef1!"
+}
+
+### (repita a requisição acima: a segunda chamada retorna 409)
+
+### Registrar usuário — senha fraca (422: user.password.strong.password)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Ana Maria Silva",
+  "email": "fraca.{{$timestamp}}@mail.com",
+  "password": "123456"
+}
+
+### Registrar usuário — nome sem sobrenome (422: user.name.person.name)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Ana",
+  "email": "nome.{{$timestamp}}@mail.com",
+  "password": "Abcdef1!"
+}
+
+### Registrar usuário — nome com caracteres inválidos (422: user.name.person.name)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Ana S1lva @",
+  "email": "invalido.{{$timestamp}}@mail.com",
+  "password": "Abcdef1!"
+}
+
+### Registrar usuário — e-mail inválido (422: user.email.invalid.email)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Ana Maria Silva",
+  "email": "ana-sem-arroba.com",
+  "password": "Abcdef1!"
+}
+
+### Registrar usuário — corpo vazio (422: senha obrigatória)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{}
